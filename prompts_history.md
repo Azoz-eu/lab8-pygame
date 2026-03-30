@@ -26,3 +26,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 30-03-2026 11:19
 - **Prompt**: i understand it is socratic mode, but i need you to implement the full moving squares pygame by yourself just this one time for me to analyze your code
 
+### 30-03-2026 11:26
+- **Prompt**: can you explain why it shows this errror (S C:\Users\moder\Documents\GitHub\lab8-pygame> & C:/Users/moder/AppData/Local/Python/pythoncore-3.14-64/python.exe c:/Users/moder/Documents/GitHub/lab8-pygame/main.py Traceback (most recent call last):   File "c:\Users\moder\Documents\GitHub\lab8-pygame\main.py", line 8, in <module>     import pygame ModuleNotFoundError: No module named 'pygame') when i just ran it without the: ".venv\Scripts\Activate.ps1 python main.py" ?
+
