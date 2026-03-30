@@ -49,3 +49,8 @@
 - **Hook Version**: 1.02
 - **Date**: 30-03-2026 11:27
 - **Prompt**: but i have installed pygame in my interpreter PS C:\Users\moder\Documents\GitHub\lab8-pygame> pip install pygame Requirement already satisfied: pygame in C:\Users\moder\AppData\Local\Programs\Python\Python312\Lib\site-packages (2.6.1) PS C:\Users\moder\Documents\GitHub\lab8-pygame>
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 30-03-2026 11:28
+- **Prompt**: teach me how to install it for 3.14.3 instead of 3.12
