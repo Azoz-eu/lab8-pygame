@@ -69,3 +69,8 @@
 - **Hook Version**: 1.02
 - **Date**: 30-03-2026 11:50
 - **Prompt**: each square different size
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 30-03-2026 11:57
+- **Prompt**: the square size isnt changed in display, its slow but the size is still the same
