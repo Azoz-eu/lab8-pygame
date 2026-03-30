@@ -47,3 +47,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 30-03-2026 11:57
 - **Prompt**: the square size isnt changed in display, its slow but the size is still the same
 
+### 30-03-2026 11:58
+- **Prompt**: implement the changes and make the background from white to black
+
