@@ -44,3 +44,8 @@
 - **Hook Version**: 1.02
 - **Date**: 30-03-2026 11:26
 - **Prompt**: can you explain why it shows this errror (S C:\Users\moder\Documents\GitHub\lab8-pygame> & C:/Users/moder/AppData/Local/Python/pythoncore-3.14-64/python.exe c:/Users/moder/Documents/GitHub/lab8-pygame/main.py Traceback (most recent call last):   File "c:\Users\moder\Documents\GitHub\lab8-pygame\main.py", line 8, in <module>     import pygame ModuleNotFoundError: No module named 'pygame') when i just ran it without the: ".venv\Scripts\Activate.ps1 python main.py" ?
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 30-03-2026 11:27
+- **Prompt**: but i have installed pygame in my interpreter PS C:\Users\moder\Documents\GitHub\lab8-pygame> pip install pygame Requirement already satisfied: pygame in C:\Users\moder\AppData\Local\Programs\Python\Python312\Lib\site-packages (2.6.1) PS C:\Users\moder\Documents\GitHub\lab8-pygame>
