@@ -14,3 +14,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 30-03-2026 11:01
 - **Prompt**: help me implement a simple pygame application that displays 10 moving squares randomly on the screen
 
+### 30-03-2026 11:05
+- **Prompt**: 1. this is my first time working with pygame 2. im not sure 3. lets start simple so random starting positions. 4. bounce back 5.building from scratch
+
