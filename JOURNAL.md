@@ -124,3 +124,8 @@
 - **Hook Version**: 1.02
 - **Date**: 07-04-2026 13:43
 - **Prompt**: is there Some jittering / randomness to the speed vector at each step on this pygame moving squares code
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 07-04-2026 13:44
+- **Prompt**: what could i do if i want to add jittering and randomness to the speed vector at each step
