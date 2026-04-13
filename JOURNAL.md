@@ -129,3 +129,8 @@
 - **Hook Version**: 1.02
 - **Date**: 07-04-2026 13:44
 - **Prompt**: what could i do if i want to add jittering and randomness to the speed vector at each step
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 13-04-2026 11:27
+- **Prompt**: generate the code explorer site for this project

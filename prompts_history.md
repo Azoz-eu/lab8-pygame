@@ -80,3 +80,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 07-04-2026 13:44
 - **Prompt**: what could i do if i want to add jittering and randomness to the speed vector at each step
 
+### 13-04-2026 11:27
+- **Prompt**: generate the code explorer site for this project
+
