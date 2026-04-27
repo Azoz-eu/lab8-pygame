@@ -176,3 +176,19 @@
 - **Hook Version**: 1.02
 - **Date**: 27-04-2026 11:43
 - **Prompt**: analyse this project and produce a light refactoring plan
+### **New Interaction**
+- **Agent Version**: 2.3
+- **Date**: 27-04-2026 11:45
+- **User**: abdulaziz.eusman@epita.fr
+- **Prompt**: analyse this project and produce a light refactoring plan
+- **CoPilot Mode**: Agent
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Created refactoring.plan.md with a beginner-friendly step-by-step refactoring plan focused on main.py and legacy-file risk in main(old).py.
+- **Context and Reasons for Changes**: User requested analysis and a light refactoring plan. Plan preserves behavior, emphasizes incremental changes, and requires concise inline comments in the future refactored code.
+
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 27-04-2026 11:52
+- **Prompt**: implement the refactoring plan in refactoring.plan.md
