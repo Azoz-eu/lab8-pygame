@@ -155,3 +155,19 @@
 - **Hook Version**: 1.02
 - **Date**: 27-04-2026 10:54
 - **Prompt**: generate the architecture documents for this project
+### **New Interaction**
+- **Agent Version**: 2.3
+- **Date**: 27-04-2026 10:56
+- **User**: abdulaziz.eusman@epita.fr
+- **Prompt**: generate the architecture documents for this project
+- **CoPilot Mode**: Agent
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Created docs/architecture.md and docs/architecture.html with dependency, runtime flow, function-level call, and primary sequence Mermaid diagrams based on main.py.
+- **Context and Reasons for Changes**: User requested architecture documents. Diagrams were derived from verified imports, classes, and control flow in main.py, with main(old).py treated as legacy context only.
+
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 27-04-2026 11:23
+- **Prompt**: generate the flash quiz site for this project
