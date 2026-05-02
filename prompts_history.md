@@ -98,3 +98,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 27-04-2026 11:52
 - **Prompt**: implement the refactoring plan in refactoring.plan.md
 
+### 02-05-2026 12:44
+- **Prompt**: explain how to implement a chase feature like the fleeing feature, what functions to use?
+
