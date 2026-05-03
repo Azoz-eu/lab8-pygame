@@ -1,23 +1,31 @@
 """
 Moving Squares Pygame Application
 
-A simple pygame program that displays 10 randomly positioned squares
+A simple pygame program that displays any randomly positioned squares
 that move around the screen and bounce off the edges.
 """
 
 import pygame
 import random
-from typing import Tuple, List
+import math
+from typing import List
 
 # Constants
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 FPS = 60
-NUM_SQUARES = 100
+NUM_SQUARES = 20
 MIN_SQUARE_SIZE = 20
 MAX_SQUARE_SIZE = 80
 MIN_VELOCITY = 1
 MAX_VELOCITY = 5
+FLEE_RADIUS = 180
+FLEE_STRENGTH = 0.35
+CHASE_RADIUS = 200
+CHASE_STRENGTH = 0.25
+RANDOM_JITTER = 0.12
+MIN_DYNAMIC_SPEED = 0.7
+MAX_DYNAMIC_SPEED = 6.0
 
 
 class Square:
@@ -50,8 +58,73 @@ class Square:
             random.randint(50, 255),
         )
 
-    def update(self) -> None:
-        """Update square position and handle bouncing off walls."""
+    def target_speed(self) -> float:
+        """Compute the preferred speed from the square's size."""
+        size_ratio = (self.size - MIN_SQUARE_SIZE) / (MAX_SQUARE_SIZE - MIN_SQUARE_SIZE)
+        return MAX_DYNAMIC_SPEED - size_ratio * (MAX_DYNAMIC_SPEED - MIN_DYNAMIC_SPEED)
+
+    def update(self, all_squares: List["Square"]) -> None:
+        """Update position with random drift and flee from larger nearby squares, and chase smaller ones."""
+        # Keep trajectories feeling organic with slight random drift.
+        self.vx += random.uniform(-RANDOM_JITTER, RANDOM_JITTER)
+        self.vy += random.uniform(-RANDOM_JITTER, RANDOM_JITTER)
+
+        # Smaller squares steer away from nearby larger squares.
+        flee_x = 0.0
+        flee_y = 0.0
+
+        # Larger squares chase nearby smaller squares
+        chase_x = 0.0
+        chase_y = 0.0
+
+        self_center_x = self.x + self.size / 2
+        self_center_y = self.y + self.size / 2
+
+        for other in all_squares:
+            if other is self:
+                continue
+
+            other_center_x = other.x + other.size / 2
+            other_center_y = other.y + other.size / 2
+            dx = self_center_x - other_center_x
+            dy = self_center_y - other_center_y
+            distance_sq = dx * dx + dy * dy
+
+            # Fleeing: smaller squares run away from larger ones
+            if other.size > self.size and 0.0 < distance_sq < FLEE_RADIUS * FLEE_RADIUS:
+                distance = math.sqrt(distance_sq)
+                influence = (FLEE_RADIUS - distance) / FLEE_RADIUS
+                flee_x += (dx / distance) * influence
+                flee_y += (dy / distance) * influence
+
+            # Chasing: larger squares chase smaller ones
+            if (
+                other.size < self.size
+                and 0.0 < distance_sq < CHASE_RADIUS * CHASE_RADIUS
+            ):
+                distance = math.sqrt(distance_sq)
+                influence = (CHASE_RADIUS - distance) / CHASE_RADIUS
+                # Chase towards the other square (opposite direction of flee)
+                chase_x -= (dx / distance) * influence
+                chase_y -= (dy / distance) * influence
+
+        self.vx += flee_x * FLEE_STRENGTH
+        self.vx += chase_x * CHASE_STRENGTH
+        self.vy += flee_y * FLEE_STRENGTH
+        self.vy += chase_y * CHASE_STRENGTH
+
+        # Keep speed near the size-based target so larger squares move slower.
+        speed = math.hypot(self.vx, self.vy)
+        target_speed = self.target_speed()
+        if speed > target_speed:
+            scale = target_speed / speed
+            self.vx *= scale
+            self.vy *= scale
+        elif 0.0 < speed < target_speed:
+            scale = target_speed / speed
+            self.vx *= scale
+            self.vy *= scale
+
         # Update position based on velocity
         self.x += self.vx
         self.y += self.vy
@@ -100,6 +173,7 @@ class Game:
 
         # Clock for controlling frame rate
         self.clock = pygame.time.Clock()
+        self.font = pygame.font.SysFont("Arial", 18, bold=True)
 
         # Create squares
         self.squares: List[Square] = [
@@ -121,7 +195,7 @@ class Game:
     def update(self) -> None:
         """Update game logic (move squares, check collisions, etc.)."""
         for square in self.squares:
-            square.update()
+            square.update(self.squares)
 
     def draw(self) -> None:
         """Draw all game objects on the screen."""
@@ -131,6 +205,12 @@ class Game:
         # Draw all squares
         for square in self.squares:
             square.draw(self.screen)
+
+        # Draw FPS in the top-left corner.
+        fps_text = self.font.render(
+            f"FPS: {self.clock.get_fps():.1f}", True, (255, 0, 0)
+        )
+        self.screen.blit(fps_text, (0, 0))
 
         # Update the display
         pygame.display.flip()

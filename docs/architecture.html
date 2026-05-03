@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>lab8-pygame Architecture</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --panel: #ffffff;
+      --ink: #1c2333;
+      --muted: #5a6478;
+      --accent: #1f6feb;
+      --line: #d9dfeb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(180deg, #eef2ff 0%, var(--bg) 40%, #f9fafb 100%);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 16px 56px;
+    }
+    h1, h2 { margin: 0 0 12px; }
+    p { margin: 0 0 12px; color: var(--muted); }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px;
+      margin-top: 16px;
+      overflow: auto;
+      box-shadow: 0 4px 14px rgba(16, 24, 40, 0.06);
+    }
+    ul { margin-top: 0; }
+    code {
+      background: #eef2ff;
+      border-radius: 4px;
+      padding: 1px 5px;
+      color: #243b75;
+    }
+    .small { font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>lab8-pygame Architecture</h1>
+    <p>Concrete architecture derived from the current project source (snapshot date: 02-05-2026) with Mermaid diagrams for dependency, runtime flow, function calls, and primary execution sequence.</p>
+
+    <section class="card">
+      <h2>Scope</h2>
+      <p class="small">This document reflects the active runtime path in <code>main.py</code>. The file <code>main(old).py</code> exists as legacy code and is not part of the active execution path. The current implementation includes both flee (smaller squares avoiding larger ones) and chase (larger squares moving toward smaller ones) behaviors in the per-entity update.</p>
+    </section>
+
+    <section class="card">
+      <h2>Dependency Graph</h2>
+      <pre class="mermaid">
+graph TD
+    Main["main.py"]
+    Legacy["main(old).py"]
+    Pygame["pygame"]
+    Random["random"]
+    Math["math"]
+    Typing["typing.List"]
+
+    Main --> Pygame
+    Main --> Random
+    Main --> Math
+    Main --> Typing
+    Legacy --> Pygame
+    Legacy --> Random
+    Legacy --> Math
+    Legacy --> Typing
+      </pre>
+    </section>
+
+    <section class="card">
+      <h2>High-Level Runtime Flow</h2>
+      <pre class="mermaid">
+flowchart TD
+    Start["Process Start"] --> Guard["if __name__ == '__main__'"]
+    Guard --> GameInit["Game.__init__()"]
+    GameInit --> InitPygame["pygame.init()"]
+    InitPygame --> Window["Create Display and Clock"]
+    Window --> CreateSquares["Create List[Square]"]
+    CreateSquares --> Run["Game.run()"]
+
+    Run --> LoopCheck{"running is True"}
+    LoopCheck -->|"Yes"| HandleEvents["Game.handle_events()"]
+    HandleEvents --> Update["Game.update()"]
+    Update --> Draw["Game.draw()"]
+    Draw --> Tick["clock.tick(FPS)"]
+    Tick --> LoopCheck
+
+    LoopCheck -->|"No"| Quit["pygame.quit()"]
+    Quit --> End["Process End"]
+      </pre>
+    </section>
+
+    <section class="card">
+      <h2>Function-Level Call Graph</h2>
+      <pre class="mermaid">
+graph TD
+    Entry["__main__ block"] --> NewGame["Game()"]
+    Entry --> RunCall["Game.run()"]
+
+    NewGame --> PyInit["pygame.init()"]
+    NewGame --> SetMode["pygame.display.set_mode()"]
+    NewGame --> SetCaption["pygame.display.set_caption()"]
+    NewGame --> NewClock["pygame.time.Clock()"]
+    NewGame --> NewFont["pygame.font.SysFont()"]
+    NewGame --> BuildSquares["[Square(...) for _ in range(NUM_SQUARES)]"]
+
+    BuildSquares --> SquareInit["Square.__init__()"]
+    SquareInit --> RandSize["random.randint()"]
+    SquareInit --> RandPos["random.randint()"]
+    SquareInit --> RandVel["random.choice() + random.uniform()"]
+    SquareInit --> RandColor["random.randint()"]
+
+    RunCall --> HandleEvents["Game.handle_events()"]
+    RunCall --> Update["Game.update()"]
+    RunCall --> Draw["Game.draw()"]
+    RunCall --> Tick["clock.tick(FPS)"]
+    RunCall --> Quit["pygame.quit()"]
+
+    HandleEvents --> EventGet["pygame.event.get()"]
+
+    Update --> SquareUpdate["Square.update(all_squares)"]
+    SquareUpdate --> Jitter["random.uniform()"]
+    SquareUpdate --> Dist["math.sqrt()"]
+    SquareUpdate --> Speed["math.hypot()"]
+    SquareUpdate --> Target["Square.target_speed()"]
+    SquareUpdate --> Flee["compute flee force"]
+    SquareUpdate --> Chase["compute chase force"]
+
+    Draw --> Fill["screen.fill()"]
+    Draw --> SquareDraw["Square.draw(surface)"]
+    Draw --> FpsRender["font.render()"]
+    Draw --> Blit["screen.blit()"]
+    Draw --> Flip["pygame.display.flip()"]
+    SquareDraw --> DrawRect["pygame.draw.rect()"]
+      </pre>
+    </section>
+
+    <section class="card">
+      <h2>Primary Execution Sequence</h2>
+      <pre class="mermaid">
+sequenceDiagram
+    participant U as "User"
+    participant OS as "OS Window System"
+    participant M as "main.py"
+    participant G as "Game"
+    participant S as "Square[*]"
+    participant P as "pygame"
+
+    U->>M: "Run python main.py"
+    M->>G: "Create Game()"
+    G->>P: "init()"
+    G->>P: "display.set_mode()"
+    G->>P: "display.set_caption()"
+    G->>P: "time.Clock()"
+    G->>P: "font.SysFont()"
+    loop "Create NUM_SQUARES"
+        G->>S: "Square.__init__(screen_width, screen_height)"
+    end
+
+    M->>G: "run()"
+    loop "While running"
+        G->>P: "event.get()"
+        alt "QUIT or ESC pressed"
+            OS-->>G: "Quit event or Escape key"
+            G->>G: "running = False"
+        else "No exit event"
+            G->>G: "running stays True"
+        end
+
+        loop "For each square"
+            G->>S: "update(all_squares)"
+            S->>S: "apply jitter"
+            S->>S: "compute flee from larger nearby squares and chase smaller nearby squares"
+            S->>S: "normalize to target speed"
+            alt "Hit horizontal wall"
+                S->>S: "invert vx"
+            else "No horizontal collision"
+                S->>S: "keep vx"
+            end
+            alt "Hit vertical wall"
+                S->>S: "invert vy"
+            else "No vertical collision"
+                S->>S: "keep vy"
+            end
+        end
+
+        G->>P: "screen.fill(black)"
+        loop "For each square"
+            G->>S: "draw(surface)"
+            S->>P: "draw.rect(...)"
+        end
+        G->>P: "font.render(FPS text)"
+        G->>P: "screen.blit(...)"
+        G->>P: "display.flip()"
+        G->>P: "clock.tick(FPS)"
+    end
+
+    G->>P: "quit()"
+      </pre>
+    </section>
+
+    <section class="card">
+      <h2>Assumptions</h2>
+      <ul>
+        <li>Only <code>main.py</code> is executed from the active entry guard.</li>
+        <li><code>main(old).py</code> is included for module context but excluded from runtime flow.</li>
+        <li>No external network or database components are present.</li>
+      </ul>
+    </section>
+  </div>
+
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({ startOnLoad: true, securityLevel: "loose", theme: "default" });
+  </script>
+</body>
+</html>

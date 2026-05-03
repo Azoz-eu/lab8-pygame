@@ -242,6 +242,17 @@
 - **Context and Reasons for Changes**: The study tool needed to match the improved runtime behavior in `main.py`, especially the new chase branch and the absence of the legacy file in the active study scope.
 
 ### **New Interaction**
+- **Agent Version**: 2.3
+- **Date**: 02-05-2026 14:57
+- **User**: abdulaziz.eusman@epita.fr
+- **Prompt**: redo the light refactoring agent.md with the newly added/improved code and analyse this project and produce a light refactoring plan
+- **CoPilot Mode**: Agent
+- **CoPilot Model**: GPT-5.4 mini
+- **Socratic Mode**: ON
+- **Changes Made**: Updated `.github/agents/light-refactoring.agent.md` to target the current chase-enabled `main.py`, and rewrote `refactoring.plan.md` so the plan matches the present code shape and preserves flee, chase, jitter, speed normalization, and bounce behavior.
+- **Context and Reasons for Changes**: The previous refactoring plan still reflected older assumptions; this refresh aligns the agent instructions and plan with the current implementation so future refactoring guidance stays accurate and beginner-friendly.
+
+### **New Interaction**
 - **Hook Version**: 1.02
 - **Date**: 02-05-2026 15:18
 - **Prompt**: redo the study tool html file again with the newly added/improved code
