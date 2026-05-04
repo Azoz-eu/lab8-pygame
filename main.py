@@ -143,21 +143,17 @@ class Square:
         self.x += self.vx
         self.y += self.vy
 
-        # Bounce off right and left walls
-        if self.x <= 0:
-            self.x = 0
-            self.vx = -self.vx  # Reverse direction
-        elif self.x >= self.screen_width - self.size:
-            self.x = self.screen_width - self.size
-            self.vx = -self.vx  # Reverse direction
+        # Wrap around right and left walls
+        if self.x + self.size <= 0:
+            self.x = self.screen_width  # Re-enter from the right wall
+        elif self.x >= self.screen_width:
+            self.x = -self.size  # Re-enter from the left wall
 
-        # Bounce off top and bottom walls
-        if self.y <= 0:
-            self.y = 0
-            self.vy = -self.vy  # Reverse direction
-        elif self.y >= self.screen_height - self.size:
-            self.y = self.screen_height - self.size
-            self.vy = -self.vy  # Reverse direction
+        # Wrap around top and bottom walls
+        if self.y + self.size <= 0:
+            self.y = self.screen_height  # Re-enter from the bottom wall
+        elif self.y >= self.screen_height:
+            self.y = -self.size  # Re-enter from the top wall
 
     def draw(self, surface: pygame.Surface) -> None:
         """
