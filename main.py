@@ -70,6 +70,12 @@ class Square:
         size_ratio = (self.size - MIN_SQUARE_SIZE) / max(1, MAX_SQUARE_SIZE - MIN_SQUARE_SIZE)
         return MAX_DYNAMIC_SPEED - size_ratio * (MAX_DYNAMIC_SPEED - MIN_DYNAMIC_SPEED)
 
+    def _check_collision(self, other: "Square") -> bool:
+        # returns true if self and other collide
+        return pygame.Rect(self.x, self.y, self.size, self.size).colliderect(
+            pygame.Rect(other.x, other.y, other.size, other.size)
+        )
+
     def respawn(self) -> None:
         """Reset position and velocity while keeping size and color unchanged."""
         self.x = random.randint(0, max(0, self.screen_width - self.size))
@@ -221,12 +227,7 @@ class Game:
                 if large.size <= small.size:
                     continue
                 # AABB overlap test
-                if (
-                    small.x < large.x + large.size
-                    and small.x + small.size > large.x
-                    and small.y < large.y + large.size
-                    and small.y + small.size > large.y
-                ):
+                if small._check_collision(large):
                     eaten.add(i)
                     break  # one kill per frame per square is enough
 
