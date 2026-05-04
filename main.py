@@ -70,6 +70,13 @@ class Square:
         size_ratio = (self.size - MIN_SQUARE_SIZE) / max(1, MAX_SQUARE_SIZE - MIN_SQUARE_SIZE)
         return MAX_DYNAMIC_SPEED - size_ratio * (MAX_DYNAMIC_SPEED - MIN_DYNAMIC_SPEED)
 
+    def respawn(self) -> None:
+        """Reset position and velocity while keeping size and color unchanged."""
+        self.x = random.randint(0, max(0, self.screen_width - self.size))
+        self.y = random.randint(0, max(0, self.screen_height - self.size))
+        self.vx = random.choice([-1, 1]) * random.uniform(MIN_VELOCITY, MAX_VELOCITY)
+        self.vy = random.choice([-1, 1]) * random.uniform(MIN_VELOCITY, MAX_VELOCITY)
+
     def update(self, all_squares: List["Square"]) -> None:
         """Update position with random drift and flee from larger nearby squares, and chase smaller ones."""
         # Keep trajectories feeling organic with slight random drift.
@@ -182,7 +189,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.font = pygame.font.SysFont("Arial", 18, bold=True)
 
-        # Create squares and mixing squares
+        # Create squares and mix squares
         self.squares: List[Square] = [
             Square(SCREEN_WIDTH, SCREEN_HEIGHT, size=size)
             for count, size in SQUARE_MIX
@@ -201,10 +208,40 @@ class Game:
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
 
+    def check_collisions(self) -> None:
+        """Respawn any smaller square that is fully overlapped by a larger one.
+
+        A "kill" is registered when the bounding boxes of a larger and a smaller
+        square intersect.  The smaller square immediately respawns at a new random
+        position with the same size, preserving the population mix.
+        """
+        eaten: set[int] = set()
+        for i, small in enumerate(self.squares):
+            if i in eaten:
+                continue
+            for j, large in enumerate(self.squares):
+                if i == j or j in eaten:
+                    continue
+                if large.size <= small.size:
+                    continue
+                # AABB overlap test
+                if (
+                    small.x < large.x + large.size
+                    and small.x + small.size > large.x
+                    and small.y < large.y + large.size
+                    and small.y + small.size > large.y
+                ):
+                    eaten.add(i)
+                    break  # one kill per frame per square is enough
+
+        for i in eaten:
+            self.squares[i].respawn()
+
     def update(self) -> None:
         """Update game logic (move squares, check collisions, etc.)."""
         for square in self.squares:
             square.update(self.squares)
+        self.check_collisions()
 
     def draw(self) -> None:
         """Draw all game objects on the screen."""
