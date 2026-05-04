@@ -8,14 +8,13 @@ that move around the screen and bounce off the edges.
 import pygame
 import random
 import math
-from typing import List
+from typing import List, Optional
 
 # Constants
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 FPS = 60
-NUM_SQUARES = 20
-MIN_SQUARE_SIZE = 20
+MIN_SQUARE_SIZE = 4
 MAX_SQUARE_SIZE = 80
 MIN_VELOCITY = 1
 MAX_VELOCITY = 5
@@ -27,25 +26,33 @@ RANDOM_JITTER = 0.12
 MIN_DYNAMIC_SPEED = 0.7
 MAX_DYNAMIC_SPEED = 6.0
 
+# Square mixing
+SQUARE_MIX = [
+    (5, 25),
+    (10, 10),
+    (30, 4),
+]
+
 
 class Square:
     """Represents a single moving square on the screen."""
 
-    def __init__(self, screen_width: int, screen_height: int):
+    def __init__(self, screen_width: int, screen_height: int, size: Optional[int] = None):
         """
         Initialize a square with random position and velocity.
 
         Args:
             screen_width: Width of the game window
             screen_height: Height of the game window
+            size: Fixed pixel size for this square. If None, a random size is chosen.
         """
         self.screen_width = screen_width
         self.screen_height = screen_height
-        self.size = random.randint(MIN_SQUARE_SIZE, MAX_SQUARE_SIZE)
+        self.size = size if size is not None else random.randint(MIN_SQUARE_SIZE, MAX_SQUARE_SIZE)
 
         # Random starting position (ensuring square stays within bounds)
-        self.x = random.randint(0, screen_width - self.size)
-        self.y = random.randint(0, screen_height - self.size)
+        self.x = random.randint(0, max(0, screen_width - self.size))
+        self.y = random.randint(0, max(0, screen_height - self.size))
 
         # Random velocity (-MAX_VELOCITY to MAX_VELOCITY for both x and y)
         self.vx = random.choice([-1, 1]) * random.uniform(MIN_VELOCITY, MAX_VELOCITY)
@@ -60,7 +67,7 @@ class Square:
 
     def target_speed(self) -> float:
         """Compute the preferred speed from the square's size."""
-        size_ratio = (self.size - MIN_SQUARE_SIZE) / (MAX_SQUARE_SIZE - MIN_SQUARE_SIZE)
+        size_ratio = (self.size - MIN_SQUARE_SIZE) / max(1, MAX_SQUARE_SIZE - MIN_SQUARE_SIZE)
         return MAX_DYNAMIC_SPEED - size_ratio * (MAX_DYNAMIC_SPEED - MIN_DYNAMIC_SPEED)
 
     def update(self, all_squares: List["Square"]) -> None:
@@ -175,9 +182,11 @@ class Game:
         self.clock = pygame.time.Clock()
         self.font = pygame.font.SysFont("Arial", 18, bold=True)
 
-        # Create squares
+        # Create squares and mixing squares
         self.squares: List[Square] = [
-            Square(SCREEN_WIDTH, SCREEN_HEIGHT) for _ in range(NUM_SQUARES)
+            Square(SCREEN_WIDTH, SCREEN_HEIGHT, size=size)
+            for count, size in SQUARE_MIX
+            for _ in range(count)
         ]
 
         # Game state
