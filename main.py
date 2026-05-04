@@ -25,7 +25,9 @@ CHASE_STRENGTH = 0.25
 RANDOM_JITTER = 0.12
 MIN_DYNAMIC_SPEED = 0.7
 MAX_DYNAMIC_SPEED = 6.0
-GROWTH_FACTOR = 0.25  # Predator gains 25% of the prey's size per eat, capped at MAX_SQUARE_SIZE
+GROWTH_FACTOR = 1  # Predator gains 100% of the prey's size per eat, capped at MAX_SQUARE_SIZE
+GROWTH_SPEED = 100  # Milliseconds over which the predator grows to its new size after eating
+
 
 # Square mixing
 SQUARE_MIX = [
@@ -38,7 +40,9 @@ SQUARE_MIX = [
 class Square:
     """Represents a single moving square on the screen."""
 
-    def __init__(self, screen_width: int, screen_height: int, size: Optional[int] = None):
+    def __init__(
+        self, screen_width: int, screen_height: int, size: Optional[int] = None
+    ):
         """
         Initialize a square with random position and velocity.
 
@@ -49,7 +53,11 @@ class Square:
         """
         self.screen_width = screen_width
         self.screen_height = screen_height
-        self.size = size if size is not None else random.randint(MIN_SQUARE_SIZE, MAX_SQUARE_SIZE)
+        self.size = (
+            size
+            if size is not None
+            else random.randint(MIN_SQUARE_SIZE, MAX_SQUARE_SIZE)
+        )
 
         # Random starting position (ensuring square stays within bounds)
         self.x = random.randint(0, max(0, screen_width - self.size))
@@ -66,9 +74,17 @@ class Square:
             random.randint(50, 255),
         )
 
+        # Animated growth, current visual size interpolates toward target_size over GROWTH_SPEED ms
+        self.target_size: float = float(self.size)
+        self._growth_start_size: float = float(self.size)
+        self._growth_start_time: int = 0
+        self._growing: bool = False
+
     def target_speed(self) -> float:
         """Compute the preferred speed from the square's size."""
-        size_ratio = (self.size - MIN_SQUARE_SIZE) / max(1, MAX_SQUARE_SIZE - MIN_SQUARE_SIZE)
+        size_ratio = (self.size - MIN_SQUARE_SIZE) / max(
+            1, MAX_SQUARE_SIZE - MIN_SQUARE_SIZE
+        )
         return MAX_DYNAMIC_SPEED - size_ratio * (MAX_DYNAMIC_SPEED - MIN_DYNAMIC_SPEED)
 
     def _check_collision(self, other: "Square") -> bool:
@@ -78,7 +94,26 @@ class Square:
         )
 
     def grow(self, prey: "Square") -> None:
-        self.size = min(MAX_SQUARE_SIZE, self.size + int(prey.size * GROWTH_FACTOR))
+        """Begin growing toward a new target size over GROWTH_SPEED ms."""
+        new_target = min(
+            MAX_SQUARE_SIZE, self.target_size + int(prey.size * GROWTH_FACTOR)
+        )
+        self._growth_start_size = self.size  # Animates from the current visual size
+        self._growth_start_time = pygame.time.get_ticks()
+        self.target_size = new_target
+        self._growing = True
+
+    def _update_growth(self) -> None:
+        """Interpolate self.size toward target_size based on elapsed time."""
+        if not self._growing:
+            return
+        elapsed = pygame.time.get_ticks() - self._growth_start_time
+        t = min(elapsed / GROWTH_SPEED, 1.0)  # 0.0 → 1.0 over GROWTH_SPEED ms
+        self.size = int(
+            self._growth_start_size + (self.target_size - self._growth_start_size) * t
+        )
+        if t >= 1.0:
+            self._growing = False
 
     def respawn(self) -> None:
         """Reset position and velocity while keeping size and color unchanged."""
@@ -89,6 +124,9 @@ class Square:
 
     def update(self, all_squares: List["Square"]) -> None:
         """Update position with random drift and flee from larger nearby squares, and chase smaller ones."""
+        # Animate size toward target if a growth is in progress
+        self._update_growth()
+
         # Keep trajectories feeling organic with slight random drift.
         self.vx += random.uniform(-RANDOM_JITTER, RANDOM_JITTER)
         self.vy += random.uniform(-RANDOM_JITTER, RANDOM_JITTER)
@@ -236,7 +274,9 @@ class Game:
                     break  # one kill per frame per square is enough
 
         for prey_i, predator_j in eaten.items():
-            self.squares[predator_j].grow(self.squares[prey_i])  # Predator grows before prey respawns
+            self.squares[predator_j].grow(
+                self.squares[prey_i]
+            )  # Predator grows before prey respawns
             self.squares[prey_i].respawn()
 
     def update(self) -> None:
