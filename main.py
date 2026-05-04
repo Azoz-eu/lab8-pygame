@@ -25,6 +25,7 @@ CHASE_STRENGTH = 0.25
 RANDOM_JITTER = 0.12
 MIN_DYNAMIC_SPEED = 0.7
 MAX_DYNAMIC_SPEED = 6.0
+GROWTH_FACTOR = 0.25  # Predator gains 25% of the prey's size per eat, capped at MAX_SQUARE_SIZE
 
 # Square mixing
 SQUARE_MIX = [
@@ -75,6 +76,9 @@ class Square:
         return pygame.Rect(self.x, self.y, self.size, self.size).colliderect(
             pygame.Rect(other.x, other.y, other.size, other.size)
         )
+
+    def grow(self, prey: "Square") -> None:
+        self.size = min(MAX_SQUARE_SIZE, self.size + int(prey.size * GROWTH_FACTOR))
 
     def respawn(self) -> None:
         """Reset position and velocity while keeping size and color unchanged."""
@@ -217,7 +221,7 @@ class Game:
         square intersect.  The smaller square immediately respawns at a new random
         position with the same size, preserving the population mix.
         """
-        eaten: set[int] = set()
+        eaten: dict[int, int] = {}  # prey index -> predator index
         for i, small in enumerate(self.squares):
             if i in eaten:
                 continue
@@ -228,11 +232,12 @@ class Game:
                     continue
                 # AABB overlap test
                 if small._check_collision(large):
-                    eaten.add(i)
+                    eaten[i] = j
                     break  # one kill per frame per square is enough
 
-        for i in eaten:
-            self.squares[i].respawn()
+        for prey_i, predator_j in eaten.items():
+            self.squares[predator_j].grow(self.squares[prey_i])  # Predator grows before prey respawns
+            self.squares[prey_i].respawn()
 
     def update(self) -> None:
         """Update game logic (move squares, check collisions, etc.)."""
